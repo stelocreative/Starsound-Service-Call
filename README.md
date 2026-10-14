@@ -1,36 +1,44 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Starsound Service Board
 
-## Getting Started
+Kanban-style service call board for Starsound Audio. Internal use only.
+Next.js 16 (App Router, TypeScript), Tailwind CSS 4, Supabase (Postgres, Auth, Storage, Realtime), deployed on Vercel.
 
-First, run the development server:
+See `HANDOFF.md` for operations: deploying, adding users and people, and the owner auto-assignment rule.
+
+## Run locally
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env.local   # fill in the Supabase URL and publishable key
+npm run dev                  # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Against a local Supabase stack (optional)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Requires Docker Desktop.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npx supabase start           # applies supabase/migrations and supabase/seed.sql
+npx supabase status -o env   # copy API_URL and ANON_KEY into .env.local
+```
 
-## Learn More
+Local magic-link emails land in Mailpit at http://127.0.0.1:54334 (ports are set in `supabase/config.toml`).
 
-To learn more about Next.js, take a look at the following resources:
+## Checks
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run lint
+npx tsc --noEmit
+npm run build
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Layout
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `app/` routes: board (`/`), `/archive`, `/settings`, `/login`, auth callbacks under `/auth/*`
+- `components/board` board, columns, cards, filters (drag and drop with dnd-kit)
+- `components/ticket` detail panel, inline editing, notes, attachments, history, new-ticket modal
+- `components/settings` people, column default owners, categories, login allowlist
+- `lib/` Supabase clients, queries, types, formatting, category palette
+- `supabase/migrations` schema, RLS, triggers, storage bucket, realtime, reference data
+- `supabase/seed.sql` sample tickets for QC (not used in production)
+- `proxy.ts` session refresh and sign-in gate

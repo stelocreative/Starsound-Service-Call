@@ -325,6 +325,7 @@ function TicketPanelContent({ ticket, columns, people, categories, onClose, onUp
               <label className="flex cursor-pointer items-center gap-2 text-[13px] font-medium text-ink-value">
                 <input
                   type="checkbox"
+                  aria-label="Replacement / upgrade"
                   checked={ticket.is_upgrade}
                   onChange={(e) => void save({ is_upgrade: e.target.checked })}
                   className="h-[15px] w-[15px] accent-accent"

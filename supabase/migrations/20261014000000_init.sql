@@ -39,6 +39,14 @@ create table public.board_columns (
   created_at        timestamptz not null default now()
 );
 
+-- First column on the board (New); used as the default for new tickets.
+create or replace function public.default_column_id()
+returns uuid
+language sql stable security definer set search_path = public
+as $$
+  select id from public.board_columns order by position asc limit 1;
+$$;
+
 -- Login allowlist. Users are logins; people are who gets assigned work.
 create table public.allowed_users (
   email         text primary key,
@@ -66,7 +74,7 @@ create sequence public.ticket_number_seq start with 1001;
 create table public.tickets (
   id                 uuid primary key default gen_random_uuid(),
   number             integer not null unique default nextval('public.ticket_number_seq'),
-  code               text generated always as ('SC-' || number::text) stored,
+  code               text generated always as ('SC-' || number::text) stored not null,
   title              text not null check (length(trim(title)) > 0),
   client             text not null check (length(trim(client)) > 0),
   contact_name       text,
@@ -81,7 +89,7 @@ create table public.tickets (
   assigned_to_id     uuid references public.people(id) on delete set null,
   owner_id           uuid references public.people(id) on delete set null,
   is_upgrade         boolean not null default false,
-  column_id          uuid not null references public.board_columns(id),
+  column_id          uuid not null default public.default_column_id() references public.board_columns(id),
   column_entered_at  timestamptz not null default now(),
   created_by         uuid references auth.users(id) on delete set null,
   created_at         timestamptz not null default now(),
@@ -339,6 +347,19 @@ end $$;
 
 revoke all on function public.move_ticket(uuid, uuid) from public;
 grant execute on function public.move_ticket(uuid, uuid) to authenticated;
+
+-- ------------------------------------------------------------
+-- Table privileges. RLS decides row access; these grants let the API roles reach the tables at all.
+-- anon gets nothing beyond the is_email_allowed() check used by the login page.
+-- ------------------------------------------------------------
+
+grant usage on schema public to anon, authenticated;
+grant select, insert, update, delete on
+  public.people, public.categories, public.board_columns, public.allowed_users,
+  public.profiles, public.tickets, public.ticket_attachments
+  to authenticated;
+grant select, insert on public.ticket_moves, public.ticket_notes to authenticated;
+grant usage, select on sequence public.ticket_number_seq to authenticated;
 
 -- ------------------------------------------------------------
 -- Row Level Security: allowlisted, signed-in users only
