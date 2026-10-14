@@ -6,9 +6,12 @@ Internal kanban board for Starsound Audio service calls. Built Oct 14, 2026 agai
 - Repo: `Service Call App/starsound-service-board` (its own git repo).
 - Drag and drop: `@dnd-kit/core`. Live updates: Supabase Realtime, with 30-second polling as a fallback.
 
-## Production status
+## Production status (Oct 14, 2026)
 
-See the "Deployment" section below for the current state and the exact steps that remain.
+- Code: complete. Lint, type check, and production build pass. The full QC checklist passed against a local Supabase stack (Docker) with the real migration, RLS, storage bucket, and Realtime.
+- Hosted Supabase project: **not created yet.** The Supabase connector available during the build refused `create_project` (it requires a cost-confirmation step the connector does not expose), and no signed-in Supabase dashboard session was available. Create the project by hand (free tier, name `starsound-service-board`, region us-west-1), then follow "Deploy → Supabase" below. Applying the migration can be done with the connector once the project exists.
+- Vercel: not deployed yet, because the app needs the Supabase URL and key as environment variables. Follow "Deploy → Vercel" once the Supabase project exists.
+- Nothing is blocked by code; the two remaining steps are account actions.
 
 ## Run locally
 

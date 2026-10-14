@@ -268,7 +268,7 @@ function TicketPanelContent({ ticket, columns, people, categories, onClose, onUp
               value={ticket.assigned_to_id ?? ""}
               onChange={(e) => void save({ assigned_to_id: e.target.value || null })}
               className="pill pill-select"
-              style={{ padding: "7px 12px", background: "var(--color-card)" }}
+              style={{ padding: "7px 12px", backgroundColor: "var(--color-card)" }}
             >
               <option value="">Tech: Unassigned</option>
               {techOptions.map((p) => (
@@ -283,7 +283,7 @@ function TicketPanelContent({ ticket, columns, people, categories, onClose, onUp
               value={ticket.owner_id ?? ""}
               onChange={(e) => void save({ owner_id: e.target.value || null })}
               className="pill pill-select"
-              style={{ padding: "7px 12px", background: "var(--color-card)" }}
+              style={{ padding: "7px 12px", backgroundColor: "var(--color-card)" }}
             >
               <option value="">Owner: None</option>
               {ownerOptions.map((p) => (
