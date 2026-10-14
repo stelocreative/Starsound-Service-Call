@@ -1,9 +1,10 @@
 "use client";
 
+import { AGING_TIERS } from "@/lib/format";
 import type { Category, Person } from "@/lib/types";
 
-export type Filters = { category: string; tech: string; owner: string; q: string };
-export const EMPTY_FILTERS: Filters = { category: "all", tech: "all", owner: "all", q: "" };
+export type Filters = { category: string; tech: string; owner: string; aging: string; q: string };
+export const EMPTY_FILTERS: Filters = { category: "all", tech: "all", owner: "all", aging: "all", q: "" };
 
 type Props = {
   filters: Filters;
@@ -59,6 +60,19 @@ export function FilterSelects({ filters, onChange, categories, people }: Props) 
           </option>
         ))}
       </select>
+      <select
+        aria-label="Filter by aging"
+        value={filters.aging}
+        onChange={(e) => set({ aging: e.target.value })}
+        className="pill pill-select"
+      >
+        <option value="all">All ages</option>
+        {[...AGING_TIERS].reverse().map((t) => (
+          <option key={t.days} value={String(t.days)}>
+            Aging {t.label}
+          </option>
+        ))}
+      </select>
     </>
   );
 }
@@ -89,5 +103,5 @@ export function SearchInput({
 }
 
 export function hasActiveFilters(f: Filters) {
-  return f.category !== "all" || f.tech !== "all" || f.owner !== "all" || f.q.trim() !== "";
+  return f.category !== "all" || f.tech !== "all" || f.owner !== "all" || f.aging !== "all" || f.q.trim() !== "";
 }

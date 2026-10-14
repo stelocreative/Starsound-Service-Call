@@ -20,9 +20,10 @@ import { NewTicketModal } from "@/components/ticket/NewTicketModal";
 import { TicketPanel } from "@/components/ticket/TicketPanel";
 import { useToast } from "@/components/ui/Toaster";
 import { clsx } from "@/lib/clsx";
+import { daysSince } from "@/lib/format";
 import { fetchBoardData, fetchTicketById } from "@/lib/queries";
 import { createClient } from "@/lib/supabase/client";
-import { NEW_KEY, PAID_KEY, type BoardData, type Ticket, type TicketInsert, type TicketUpdate } from "@/lib/types";
+import { PAID_KEY, type BoardData, type Ticket, type TicketInsert, type TicketUpdate } from "@/lib/types";
 import { BoardColumn } from "./BoardColumn";
 import { EMPTY_FILTERS, FilterSelects, SearchInput, hasActiveFilters, type Filters } from "./BoardFilters";
 import { TicketCard } from "./TicketCard";
@@ -72,7 +73,8 @@ export function Board({ initial }: { initial: BoardData }) {
   const categoriesById = useMemo(() => new Map(data.categories.map((c) => [c.id, c])), [data.categories]);
   const columnsById = useMemo(() => new Map(data.columns.map((c) => [c.id, c])), [data.columns]);
   const paidColumn = data.columns.find((c) => c.key === PAID_KEY);
-  const newColumn = data.columns.find((c) => c.key === NEW_KEY) ?? data.columns[0];
+  // New tickets land in the first column; the database applies the same rule.
+  const newColumn = data.columns[0];
 
   /* ---------- refresh: realtime + polling + focus ---------- */
   const refresh = useCallback(async () => {
@@ -93,6 +95,7 @@ export function Board({ initial }: { initial: BoardData }) {
     const channel = supabase
       .channel("board-tickets")
       .on("postgres_changes", { event: "*", schema: "public", table: "tickets" }, schedule)
+      .on("postgres_changes", { event: "*", schema: "public", table: "board_columns" }, schedule)
       .subscribe((status) => setLive(status === "SUBSCRIBED"));
     const poll = window.setInterval(() => void refresh(), 30_000);
     const onVisible = () => {
@@ -212,9 +215,14 @@ export function Board({ initial }: { initial: BoardData }) {
         if (filters.category !== "all" && t.category_id !== filters.category) return false;
         if (filters.tech === "none" ? t.assigned_to_id !== null : filters.tech !== "all" && t.assigned_to_id !== filters.tech) return false;
         if (filters.owner === "none" ? t.owner_id !== null : filters.owner !== "all" && t.owner_id !== filters.owner) return false;
+        if (filters.aging !== "all") {
+          // Paid cards are done; aging only applies to live stages.
+          if (t.column_id === paidColumn?.id) return false;
+          if (daysSince(t.column_entered_at) < Number(filters.aging)) return false;
+        }
         return matchesQuery(t, q);
       }),
-    [data.tickets, filters.category, filters.tech, filters.owner, q],
+    [data.tickets, filters.category, filters.tech, filters.owner, filters.aging, paidColumn?.id, q],
   );
 
   const byColumn = useMemo(() => {

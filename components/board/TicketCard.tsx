@@ -5,7 +5,7 @@ import { Avatar } from "@/components/ui/Avatar";
 import { CategoryChip, UpgradeBadge } from "@/components/ui/Chip";
 import { categoryStyle } from "@/lib/categories";
 import { clsx } from "@/lib/clsx";
-import { STALE_DAYS, daysSince } from "@/lib/format";
+import { agingTier, daysSince } from "@/lib/format";
 import type { Category, Person, Ticket } from "@/lib/types";
 
 type Props = {
@@ -24,12 +24,12 @@ type Props = {
 export function daysBadge(ticket: Ticket, isPaid: boolean) {
   if (isPaid) return { text: "Paid", fg: "#6FDCA6", bg: "#0F2E1F", title: "Paid" };
   const days = daysSince(ticket.column_entered_at);
-  const stale = days >= STALE_DAYS;
+  const tier = agingTier(days);
   return {
     text: `${days}d`,
-    fg: stale ? "#F0B35C" : "#9AA3B8",
-    bg: stale ? "#33250D" : "#1C222E",
-    title: `${days} day${days === 1 ? "" : "s"} in this column${stale ? " (stale)" : ""}`,
+    fg: tier?.fg ?? "#9AA3B8",
+    bg: tier?.bg ?? "#1C222E",
+    title: `${days} day${days === 1 ? "" : "s"} in this column${tier ? ` · aging ${tier.label}` : ""}`,
   };
 }
 
@@ -60,7 +60,7 @@ export function TicketCard({ ticket, category, tech, owner, isPaid, onOpen, over
     >
       <div className="flex w-full items-center gap-2">
         <span className="font-mono text-[11px] font-medium tracking-[0.04em] text-label">{ticket.code}</span>
-        <span className="mono-badge ml-auto" style={{ color: badge.fg, background: badge.bg }} title={badge.title}>
+        <span className="mono-badge ml-auto" style={{ color: badge.fg, background: badge.bg }} title={badge.title} aria-label={badge.title}>
           {badge.text}
         </span>
       </div>

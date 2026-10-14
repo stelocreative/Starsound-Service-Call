@@ -1,6 +1,18 @@
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-export const STALE_DAYS = 6;
+/** Aging tiers: how long a ticket has sat in its current column, longest threshold first. */
+export const AGING_TIERS = [
+  { days: 60, label: "60+ days", fg: "#FFFFFF", bg: "#B3261E" },
+  { days: 30, label: "30+ days", fg: "#FF9A9A", bg: "#3A1414" },
+  { days: 14, label: "14+ days", fg: "#F8B07A", bg: "#3A2110" },
+  { days: 7, label: "7+ days", fg: "#F0B35C", bg: "#33250D" },
+] as const;
+export type AgingTier = (typeof AGING_TIERS)[number];
+
+/** The aging tier a ticket has reached after `days` in its column, or null while it is fresh. */
+export function agingTier(days: number): AgingTier | null {
+  return AGING_TIERS.find((t) => days >= t.days) ?? null;
+}
 export const DAY_MS = 86_400_000;
 
 /** Parse a YYYY-MM-DD date-only string as a local date (no timezone shift). */

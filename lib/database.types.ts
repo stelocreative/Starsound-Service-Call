@@ -242,30 +242,36 @@ export type Database = {
       ticket_moves: {
         Row: {
           from_column_id: string | null
+          from_column_name: string | null
           id: string
           moved_at: string
           moved_by: string | null
           moved_by_name: string
           ticket_id: string
-          to_column_id: string
+          to_column_id: string | null
+          to_column_name: string | null
         }
         Insert: {
           from_column_id?: string | null
+          from_column_name?: string | null
           id?: string
           moved_at?: string
           moved_by?: string | null
           moved_by_name?: string
           ticket_id: string
-          to_column_id: string
+          to_column_id?: string | null
+          to_column_name?: string | null
         }
         Update: {
           from_column_id?: string | null
+          from_column_name?: string | null
           id?: string
           moved_at?: string
           moved_by?: string | null
           moved_by_name?: string
           ticket_id?: string
-          to_column_id?: string
+          to_column_id?: string | null
+          to_column_name?: string | null
         }
         Relationships: [
           {
@@ -435,10 +441,29 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_column: {
+        Args: { p_name: string; p_description?: string | null; p_default_owner_id?: string | null }
+        Returns: {
+          created_at: string
+          default_owner_id: string | null
+          description: string | null
+          id: string
+          key: string
+          name: string
+          position: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "board_columns"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       current_display_name: { Args: never; Returns: string }
       default_column_id: { Args: never; Returns: string }
       is_allowed: { Args: never; Returns: boolean }
       is_email_allowed: { Args: { p_email: string }; Returns: boolean }
+      reorder_columns: { Args: { p_ids: string[] }; Returns: undefined }
       move_ticket: {
         Args: { p_column_id: string; p_ticket_id: string }
         Returns: {

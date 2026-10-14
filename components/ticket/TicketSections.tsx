@@ -210,7 +210,8 @@ export function AttachmentsSection({
 /* ---------------- History ---------------- */
 
 export function HistorySection({ moves, columns, loading }: { moves: TicketMove[]; columns: BoardColumn[]; loading: boolean }) {
-  const name = (id: string | null) => (id ? columns.find((c) => c.id === id)?.name ?? "Unknown" : null);
+  // Moves snapshot column names, so history survives renamed or deleted columns.
+  const name = (id: string | null) => (id ? (columns.find((c) => c.id === id)?.name ?? null) : null);
   return (
     <section className="flex flex-col gap-1.5" aria-labelledby="history-heading">
       <h3 id="history-heading" className="section-label">
@@ -219,8 +220,8 @@ export function HistorySection({ moves, columns, loading }: { moves: TicketMove[
       {loading && moves.length === 0 ? <div className="text-[12.5px] text-muted">Loading…</div> : null}
       <ol className="flex flex-col gap-1.5">
         {moves.map((m) => {
-          const from = name(m.from_column_id);
-          const to = name(m.to_column_id);
+          const from = m.from_column_name ?? name(m.from_column_id);
+          const to = m.to_column_name ?? name(m.to_column_id) ?? "a removed column";
           return (
             <li key={m.id} className="text-[12.5px] text-label">
               <span className="font-semibold text-ink-value">{from ? `${from} → ${to}` : `Created in ${to}`}</span> · {m.moved_by_name} ·{" "}

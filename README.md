@@ -37,7 +37,7 @@ npm run build
 - `app/` routes: board (`/`), `/archive`, `/settings`, `/login`, auth callbacks under `/auth/*`
 - `components/board` board, columns, cards, filters (drag and drop with dnd-kit)
 - `components/ticket` detail panel, inline editing, notes, attachments, history, new-ticket modal
-- `components/settings` people, column default owners, categories, login allowlist
+- `components/settings` people, columns (rename, reorder, add, delete, default owners), categories, login allowlist
 - `lib/` Supabase clients, queries, types, formatting, category palette
 - `supabase/migrations` schema, RLS, triggers, storage bucket, realtime, reference data
 - `supabase/seed.sql` sample tickets for QC (not used in production)

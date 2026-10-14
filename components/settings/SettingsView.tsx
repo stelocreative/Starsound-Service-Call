@@ -11,7 +11,7 @@ import { UsersSettings } from "./UsersSettings";
 
 const TABS = [
   { key: "people", label: "People" },
-  { key: "columns", label: "Column owners" },
+  { key: "columns", label: "Columns" },
   { key: "categories", label: "Categories" },
   { key: "users", label: "Users" },
 ] as const;
