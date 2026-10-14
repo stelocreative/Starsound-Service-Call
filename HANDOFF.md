@@ -8,12 +8,12 @@ Internal kanban board for Starsound Audio service calls. Built Oct 14, 2026 agai
 
 ## Production status (Oct 14, 2026)
 
-- **Live:** https://starsound-service-board.vercel.app (Vercel project `starsound-service-board`, production deployment `dpl_EAhscuBWhicvw8p4Xx9LPftfA7ne`). The deployment was made by uploading this repo's files directly, so no Git integration is linked yet; see "Deploy → Vercel" for how to redeploy after changes.
+- **Live:** https://starsound-service-board.vercel.app (Vercel project `starsound-service-board`, production deployment `dpl_4GwVLs9VkmJrTr7ivBFijj2Fb8Lz`, which includes column management and aging tiers). The deployment was made by uploading this repo's files directly, so no Git integration is linked yet; see "Deploy → Vercel" for how to redeploy after changes.
 - **Supabase:** project `starsound-service-board`, ref `twmdmcibdttazbizglex` (https://twmdmcibdttazbizglex.supabase.co, free tier). Both migrations in `supabase/migrations/` are applied, the private `attachments` bucket and the Realtime publication exist. Auth → URL configuration: Site URL `https://starsound-service-board.vercel.app`; redirect URLs `https://starsound-service-board.vercel.app/**` and `http://localhost:3000/**`.
 - **Vercel environment variables:** `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (all environments), `NEXT_PUBLIC_SITE_URL` (production). The app never uses the service-role key.
 - **QC:** the full checklist passed against production on Oct 14, 2026: magic-link sign-in, create ticket, drag between columns with owner auto-reset, inline edits, notes from two logins with live updates, PDF upload with a signed download link, settings tabs, archive after 14 days in Paid, mobile layout at 375 px, signed-out redirects, and RLS probes (anonymous and non-allowlisted users are refused by the database).
 - **Data:** the sample tickets and the two temporary QC logins were deleted after QC. The database holds the four people, the ten columns with their default owners, the four categories, and the allowlist rows described below.
-- **Allowlist:** `nick@starsound.com` is the first real login (linked to the person Nick, added Oct 14, 2026). The other three rows are still placeholders (`[john email]`, `[ryan email]`, `[connor email]`); replace them before rollout (see "Replace the placeholder logins").
+- **Allowlist:** the placeholder rows have been replaced with real staff addresses (Oct 14, 2026), managed in Settings → Users. `nick@starsound.com` has signed in; the others sign in with a magic link the first time they open the board.
 - **Email delivery:** magic links go out through Supabase's built-in sender until custom SMTP is configured. That sender is rate-limited to a few emails per hour and, per Supabase's docs, only delivers to addresses that are members of the Supabase organization, so set up custom SMTP (step 4 under "Deploy → Supabase") before other staff try to sign in.
 
 ## Run locally
