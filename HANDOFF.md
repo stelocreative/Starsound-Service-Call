@@ -12,8 +12,9 @@ Internal kanban board for Starsound Audio service calls. Built Oct 14, 2026 agai
 - **Supabase:** project `starsound-service-board`, ref `twmdmcibdttazbizglex` (https://twmdmcibdttazbizglex.supabase.co, free tier). The migration in `supabase/migrations/` is applied, the private `attachments` bucket and the Realtime publication exist. Auth → URL configuration: Site URL `https://starsound-service-board.vercel.app`; redirect URLs `https://starsound-service-board.vercel.app/**` and `http://localhost:3000/**`.
 - **Vercel environment variables:** `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (all environments), `NEXT_PUBLIC_SITE_URL` (production). The app never uses the service-role key.
 - **QC:** the full checklist passed against production on Oct 14, 2026: magic-link sign-in, create ticket, drag between columns with owner auto-reset, inline edits, notes from two logins with live updates, PDF upload with a signed download link, settings tabs, archive after 14 days in Paid, mobile layout at 375 px, signed-out redirects, and RLS probes (anonymous and non-allowlisted users are refused by the database).
-- **Data:** the sample tickets and the two temporary QC logins were deleted after QC. The database holds the four people, the ten columns with their default owners, the four categories, and the four placeholder allowlist rows (`[nick email]`, `[john email]`, `[ryan email]`, `[connor email]`).
-- **Remaining account action:** replace the placeholder allowlist rows with real addresses (see "Replace the placeholder logins"). Until that is done nobody can sign in.
+- **Data:** the sample tickets and the two temporary QC logins were deleted after QC. The database holds the four people, the ten columns with their default owners, the four categories, and the allowlist rows described below.
+- **Allowlist:** `nick@starsound.com` is the first real login (linked to the person Nick, added Oct 14, 2026). The other three rows are still placeholders (`[john email]`, `[ryan email]`, `[connor email]`); replace them before rollout (see "Replace the placeholder logins").
+- **Email delivery:** magic links go out through Supabase's built-in sender until custom SMTP is configured. That sender is rate-limited to a few emails per hour and, per Supabase's docs, only delivers to addresses that are members of the Supabase organization, so set up custom SMTP (step 4 under "Deploy → Supabase") before other staff try to sign in.
 
 ## Run locally
 
@@ -41,7 +42,7 @@ Checks before shipping: `npm run lint`, `npx tsc --noEmit`, `npm run build`.
 1. Create a project (free tier is fine). Note the Project URL and the publishable key (Project Settings → API).
 2. Apply `supabase/migrations/20261014000000_init.sql` (SQL editor, Supabase MCP `apply_migration`, or `npx supabase db push` after `npx supabase link`). It creates the schema, Row Level Security, the private `attachments` bucket, Realtime, and seeds people, categories, columns, and the four placeholder logins.
 3. Authentication → URL Configuration: set **Site URL** to the production URL (for example `https://starsound-service-board.vercel.app`) and add `https://<production-url>/**` and `http://localhost:3000/**` to **Redirect URLs**. Without this, magic links redirect to localhost.
-4. Authentication → Providers → Email: leave Email enabled (magic links). Recommended: configure custom SMTP (Authentication → SMTP Settings) because Supabase's built-in sender is rate-limited to a few emails per hour.
+4. Authentication → Providers → Email: leave Email enabled (magic links). Configure custom SMTP (Authentication → SMTP Settings, for example Resend or Postmark) before rollout: Supabase's built-in sender is rate-limited to a few emails per hour and, per Supabase's docs, only delivers to email addresses that are members of the Supabase organization, so magic links to other staff addresses will not arrive without it.
 5. Do not run `supabase/seed.sql` in production; it is sample data for QC.
 
 ### Vercel
