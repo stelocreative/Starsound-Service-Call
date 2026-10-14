@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { clsx } from "@/lib/clsx";
 
 type Props = {
@@ -12,7 +13,11 @@ type Props = {
   labelledBy?: string;
 };
 
-/** Centered modal with a dim backdrop; closes on Escape or backdrop click. */
+/**
+ * Centered modal with a dim backdrop; closes on Escape or backdrop click.
+ * Rendered into document.body so it escapes any ancestor stacking context
+ * (the header is a flex child with a z-index, which would otherwise trap it).
+ */
 export function Modal({ open, onClose, title, children, width = 430, labelledBy }: Props) {
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -31,9 +36,9 @@ export function Modal({ open, onClose, title, children, width = 430, labelledBy 
     };
   }, [open, onClose]);
 
-  if (!open) return null;
+  if (!open || typeof document === "undefined") return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <button
         type="button"
@@ -59,6 +64,7 @@ export function Modal({ open, onClose, title, children, width = 430, labelledBy 
         ) : null}
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

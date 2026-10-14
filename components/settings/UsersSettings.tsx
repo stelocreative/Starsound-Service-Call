@@ -72,7 +72,7 @@ export function UsersSettings({ users: initial, people }: { users: AllowedUser[]
   return (
     <div>
       <SettingsIntro>
-        Users are logins. Anyone on this list can request a magic link and gets full access; everyone else is
+        Users are logins. Anyone on this list can sign in (with a magic link, or a password they set from the account menu) and gets full access; everyone else is
         refused at sign-in and by the database. Link a login to a person so notes and moves show that person&apos;s
         name. Placeholder rows in brackets must be replaced with real addresses.
       </SettingsIntro>

@@ -42,7 +42,7 @@ Checks before shipping: `npm run lint`, `npx tsc --noEmit`, `npm run build`.
 1. Create a project (free tier is fine). Note the Project URL and the publishable key (Project Settings → API).
 2. Apply every file in `supabase/migrations/` in order (SQL editor, Supabase MCP `apply_migration`, or `npx supabase db push` after `npx supabase link`). `20261014000000_init.sql` creates the schema, Row Level Security, the private `attachments` bucket, Realtime, and seeds people, categories, columns, and the four placeholder logins; `20261015000000_editable_columns.sql` adds column management (add, rename, reorder, delete) and the history snapshots that make deleting a column safe.
 3. Authentication → URL Configuration: set **Site URL** to the production URL (for example `https://starsound-service-board.vercel.app`) and add `https://<production-url>/**` and `http://localhost:3000/**` to **Redirect URLs**. Without this, magic links redirect to localhost.
-4. Authentication → Providers → Email: leave Email enabled (magic links). Configure custom SMTP (Authentication → SMTP Settings, for example Resend or Postmark) before rollout: Supabase's built-in sender is rate-limited to a few emails per hour and, per Supabase's docs, only delivers to email addresses that are members of the Supabase organization, so magic links to other staff addresses will not arrive without it.
+4. Authentication → Providers → Email: leave Email enabled; it covers both magic links and passwords (see "Two ways to sign in" under "Logins and people"). Configure custom SMTP (Authentication → SMTP Settings, for example Resend or Postmark) before rollout: Supabase's built-in sender is rate-limited to a few emails per hour and, per Supabase's docs, only delivers to email addresses that are members of the Supabase organization, so magic links to other staff addresses will not arrive without it.
 5. Do not run `supabase/seed.sql` in production; it is sample data for QC.
 
 ### Vercel
@@ -57,7 +57,15 @@ Checks before shipping: `npm run lint`, `npx tsc --noEmit`, `npm run build`.
 ## Logins and people (two different things)
 
 - **People** (Settings → People) are who can be assigned work or own a stage: John, Ryan, Nick, Connor to start. Add a person with a name and initials; deactivate instead of deleting so history stays intact. Inactive people disappear from the assign and owner menus but still display on tickets they are on.
-- **Users** (Settings → Users) are logins. Anyone on the list can request a magic link and gets full access; nobody else can sign in (checked on the login page, enforced by a database trigger on sign-up, and enforced again by RLS on every query). Link a login to a person so notes and history show that person's name and initials.
+- **Users** (Settings → Users) are logins. Anyone on the list can sign in, by magic link or with a password they set themselves, and gets full access; nobody else can sign in (checked on the login page, enforced by a database trigger on sign-up, and enforced again by RLS on every query). Link a login to a person so notes and history show that person's name and initials.
+
+### Two ways to sign in
+
+- **Magic link (default).** Enter the email at `/login` and open the emailed link in the same browser. The first link also creates the account, so everyone starts here.
+- **Password (optional).** After signing in once, open the account menu (the initials at the top right) → **Set a password**, and enter it twice (at least 8 characters). From then on `/login` → **Sign in with a password instead** takes that email and password; the link option stays on the page. The same menu item replaces the password later.
+- **Forgot password:** there is no reset email. Sign in with a magic link, then set a new password from the account menu.
+- **The allowlist stays in charge.** Both forms check the allowlist first (that is only for a friendly error), and the database trigger on `auth.users` refuses any account whose email is not on the list, whether it arrives by link, by password, or by calling the Supabase API directly. There is no sign-up form: a password can only be added to an account that already exists, and accounts are only ever created by the first magic link. Removing an email from Settings → Users cuts off both methods at once, because every query goes through RLS, even if that person still knows a password.
+- **Supabase settings** (Authentication → Providers → Email): keep Email enabled; it covers both links and passwords and is on by default (confirmed Oct 14, 2026: the project reports the email provider on and sign-ups allowed). Leave "Allow new users to sign up" on, because first-time magic links need it. Optional: raise Minimum password length from 6 to 8 to match the form. If "Secure password change" is ever turned on, setting a password needs a sign-in within the last 24 hours; the form explains that and a fresh magic link fixes it.
 
 ### Replace the placeholder logins
 
@@ -76,7 +84,7 @@ After that, manage users in Settings → Users.
 
 ### Add a user later
 
-Settings → Users → enter the email, an optional display name, and the linked person → Add user. They sign in at `/login` with their email and click the link. Magic links must be opened in the same browser they were requested from (PKCE); the login page says so.
+Settings → Users → enter the email, an optional display name, and the linked person → Add user. They sign in at `/login` with their email and click the link. Magic links must be opened in the same browser they were requested from (PKCE); the login page says so. Once in, they can add a password from the account menu (see "Two ways to sign in").
 
 To remove access, remove the email from the list. The person stays in Settings → People.
 

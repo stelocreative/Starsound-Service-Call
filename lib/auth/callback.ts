@@ -1,12 +1,7 @@
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-
-/** Only allow same-site relative paths as post-login destinations. */
-export function safeNextPath(value: string | null | undefined): string {
-  if (!value || !value.startsWith("/") || value.startsWith("//") || value.startsWith("/\\")) return "/";
-  return value;
-}
+import { safeNextPath } from "./paths";
 
 /** Public origin for redirects: configured site URL, else the proxied host, else the request origin. */
 export function resolveOrigin(request: NextRequest): string {
