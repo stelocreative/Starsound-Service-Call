@@ -8,10 +8,12 @@ Internal kanban board for Starsound Audio service calls. Built Oct 14, 2026 agai
 
 ## Production status (Oct 14, 2026)
 
-- Code: complete. Lint, type check, and production build pass. The full QC checklist passed against a local Supabase stack (Docker) with the real migration, RLS, storage bucket, and Realtime.
-- Hosted Supabase project: **not created yet.** The Supabase connector available during the build refused `create_project` (it requires a cost-confirmation step the connector does not expose), and no signed-in Supabase dashboard session was available. Create the project by hand (free tier, name `starsound-service-board`, region us-west-1), then follow "Deploy → Supabase" below. Applying the migration can be done with the connector once the project exists.
-- Vercel: not deployed yet, because the app needs the Supabase URL and key as environment variables. Follow "Deploy → Vercel" once the Supabase project exists.
-- Nothing is blocked by code; the two remaining steps are account actions.
+- **Live:** https://starsound-service-board.vercel.app (Vercel project `starsound-service-board`, production deployment `dpl_EAhscuBWhicvw8p4Xx9LPftfA7ne`). The deployment was made by uploading this repo's files directly, so no Git integration is linked yet; see "Deploy → Vercel" for how to redeploy after changes.
+- **Supabase:** project `starsound-service-board`, ref `twmdmcibdttazbizglex` (https://twmdmcibdttazbizglex.supabase.co, free tier). The migration in `supabase/migrations/` is applied, the private `attachments` bucket and the Realtime publication exist. Auth → URL configuration: Site URL `https://starsound-service-board.vercel.app`; redirect URLs `https://starsound-service-board.vercel.app/**` and `http://localhost:3000/**`.
+- **Vercel environment variables:** `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (all environments), `NEXT_PUBLIC_SITE_URL` (production). The app never uses the service-role key.
+- **QC:** the full checklist passed against production on Oct 14, 2026: magic-link sign-in, create ticket, drag between columns with owner auto-reset, inline edits, notes from two logins with live updates, PDF upload with a signed download link, settings tabs, archive after 14 days in Paid, mobile layout at 375 px, signed-out redirects, and RLS probes (anonymous and non-allowlisted users are refused by the database).
+- **Data:** the sample tickets and the two temporary QC logins were deleted after QC. The database holds the four people, the ten columns with their default owners, the four categories, and the four placeholder allowlist rows (`[nick email]`, `[john email]`, `[ryan email]`, `[connor email]`).
+- **Remaining account action:** replace the placeholder allowlist rows with real addresses (see "Replace the placeholder logins"). Until that is done nobody can sign in.
 
 ## Run locally
 
