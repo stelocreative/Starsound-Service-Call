@@ -3,12 +3,12 @@
 Internal kanban board for Starsound Audio service calls. Built Oct 14, 2026 against `starsound-service-board-handoff/SPEC.md`.
 
 - Stack: Next.js 16 (App Router, TypeScript), Tailwind CSS 4, Supabase (Postgres, Auth, Storage, Realtime), Vercel.
-- Repo: `Service Call App/starsound-service-board` (its own git repo).
+- Repo: `Service Call App/starsound-service-board` (its own git repo), pushed to GitHub as `stelocreative/Starsound-Service-Call` (public; default branch `main`).
 - Drag and drop: `@dnd-kit/core`. Live updates: Supabase Realtime, with 30-second polling as a fallback.
 
 ## Production status (Oct 14, 2026)
 
-- **Live:** https://starsound-service-board.vercel.app (Vercel project `starsound-service-board`, production deployment `dpl_4GwVLs9VkmJrTr7ivBFijj2Fb8Lz`, which includes column management and aging tiers). The deployment was made by uploading this repo's files directly, so no Git integration is linked yet; see "Deploy → Vercel" for how to redeploy after changes.
+- **Live:** https://starsound-service-board.vercel.app (Vercel project `starsound-service-board`, linked to the GitHub repo `stelocreative/Starsound-Service-Call`, production branch `main`). Production is always the latest successful build of `main`; the first Git-triggered build (`dpl_2LvWbrQHCP1toyAYnArSTZrxN6Kf`, commit `18bef62`, Oct 14, 2026) went live with column management and aging tiers. Every push to `main` deploys automatically; see "Deploy → Vercel".
 - **Supabase:** project `starsound-service-board`, ref `twmdmcibdttazbizglex` (https://twmdmcibdttazbizglex.supabase.co, free tier). Both migrations in `supabase/migrations/` are applied, the private `attachments` bucket and the Realtime publication exist. Auth → URL configuration: Site URL `https://starsound-service-board.vercel.app`; redirect URLs `https://starsound-service-board.vercel.app/**` and `http://localhost:3000/**`.
 - **Vercel environment variables:** `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (all environments), `NEXT_PUBLIC_SITE_URL` (production). The app never uses the service-role key.
 - **QC:** the full checklist passed against production on Oct 14, 2026: magic-link sign-in, create ticket, drag between columns with owner auto-reset, inline edits, notes from two logins with live updates, PDF upload with a signed download link, settings tabs, archive after 14 days in Paid, mobile layout at 375 px, signed-out redirects, and RLS probes (anonymous and non-allowlisted users are refused by the database).
@@ -47,12 +47,15 @@ Checks before shipping: `npm run lint`, `npx tsc --noEmit`, `npm run build`.
 
 ### Vercel
 
-1. Create a project from this repo (framework preset: Next.js) or deploy with the Vercel CLI.
-2. Environment variables (Production and Preview):
+The Vercel project `starsound-service-board` (team `stelocreatives-projects`) is linked to the GitHub repo `stelocreative/Starsound-Service-Call` with production branch `main`. The repo is public, so never commit `.env*` files or keys (`.gitignore` already excludes them).
+
+1. **Deploy:** push to `main`. Vercel builds the commit and, when the build succeeds, promotes it to https://starsound-service-board.vercel.app. Nothing else needs to run; the earlier route of uploading files through the Vercel connector or CLI is no longer needed. Pushes to other branches and pull requests get preview deployments.
+2. **Check or roll back:** Vercel dashboard → project → Deployments (build logs are there when a push fails). A failed build never replaces production; to roll back, open the previous READY production deployment and choose Instant Rollback (or Promote to Production).
+3. Environment variables (already set for Production and Preview; edit under Settings → Environment Variables, then redeploy):
    - `NEXT_PUBLIC_SUPABASE_URL` = the Supabase project URL
    - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` = the publishable (or legacy anon) key
    - `NEXT_PUBLIC_SITE_URL` = the production URL (optional, makes auth redirects explicit)
-3. Deploy. No service-role key is needed anywhere; the app only ever uses the publishable key, and Postgres RLS enforces access.
+4. New environment from scratch: Vercel → Add New → Project → import the repo (framework preset Next.js), add the variables above, and deploy. No service-role key is needed anywhere; the app only ever uses the publishable key, and Postgres RLS enforces access.
 
 ## Logins and people (two different things)
 
