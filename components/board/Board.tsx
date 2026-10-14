@@ -339,7 +339,7 @@ export function Board({ initial }: { initial: BoardData }) {
         </div>
       ) : null}
 
-      <DndContext sensors={sensors} collisionDetection={collisionDetection} onDragStart={onDragStart} onDragEnd={onDragEnd} onDragCancel={onDragCancel}>
+      <DndContext id="service-board-dnd" sensors={sensors} collisionDetection={collisionDetection} onDragStart={onDragStart} onDragEnd={onDragEnd} onDragCancel={onDragCancel}>
         <div
           ref={scrollerRef}
           onScroll={onScroll}
