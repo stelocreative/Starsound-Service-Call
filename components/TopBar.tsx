@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useCurrentUser } from "./CurrentUserProvider";
+import { SetPasswordModal } from "./SetPasswordModal";
 import { Avatar } from "./ui/Avatar";
 import { clsx } from "@/lib/clsx";
 
@@ -59,6 +60,8 @@ export function TopBar({ children }: { children?: React.ReactNode }) {
 function UserMenu() {
   const user = useCurrentUser();
   const [open, setOpen] = useState(false);
+  const [passwordOpen, setPasswordOpen] = useState(false);
+  const closePassword = useCallback(() => setPasswordOpen(false), []);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -79,6 +82,7 @@ function UserMenu() {
 
   return (
     <div ref={ref} className="relative ml-auto">
+      <SetPasswordModal open={passwordOpen} onClose={closePassword} />
       <button
         type="button"
         aria-haspopup="menu"
@@ -99,6 +103,17 @@ function UserMenu() {
             <div className="truncate text-[12px] text-label">{user.email}</div>
           </div>
           <div className="my-1 border-t border-line" />
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              setOpen(false);
+              setPasswordOpen(true);
+            }}
+            className="w-full rounded-md px-2.5 py-2 text-left text-[13px] text-ink-3 hover:bg-card hover:text-ink"
+          >
+            Set a password
+          </button>
           <form action="/auth/signout" method="post">
             <button
               type="submit"
