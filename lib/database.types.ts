@@ -388,6 +388,9 @@ export type Database = {
           created_at: string
           created_by: string | null
           date_received: string
+          deleted_at: string | null
+          deleted_by: string | null
+          deleted_by_name: string | null
           description: string | null
           first_site_visit: string | null
           id: string
@@ -412,6 +415,9 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           date_received?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          deleted_by_name?: string | null
           description?: string | null
           first_site_visit?: string | null
           id?: string
@@ -436,6 +442,9 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           date_received?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          deleted_by_name?: string | null
           description?: string | null
           first_site_visit?: string | null
           id?: string
@@ -505,7 +514,9 @@ export type Database = {
       default_column_id: { Args: never; Returns: string }
       is_allowed: { Args: never; Returns: boolean }
       is_email_allowed: { Args: { p_email: string }; Returns: boolean }
+      recycle_ticket: { Args: { p_ticket_id: string }; Returns: undefined }
       reorder_columns: { Args: { p_ids: string[] }; Returns: undefined }
+      restore_ticket: { Args: { p_ticket_id: string }; Returns: undefined }
       move_ticket: {
         Args: { p_column_id: string; p_ticket_id: string }
         Returns: {
@@ -521,6 +532,9 @@ export type Database = {
           created_at: string
           created_by: string | null
           date_received: string
+          deleted_at: string | null
+          deleted_by: string | null
+          deleted_by_name: string | null
           description: string | null
           first_site_visit: string | null
           id: string

@@ -32,8 +32,8 @@ type Props = {
   onClose: () => void;
   onUpdate: (patch: TicketUpdate) => Promise<boolean>;
   onMove: (columnId: string) => Promise<void>;
-  /** Deletes the ticket for good; resolves true when it is gone (the parent closes the panel). */
-  onDelete: () => Promise<boolean>;
+  /** Moves the ticket to the recycle bin; resolves true when it is gone (the parent closes the panel). */
+  onRecycle: () => Promise<boolean>;
 };
 
 const EMPTY_DETAIL: TicketDetail = { notes: [], attachments: [], moves: [] };
@@ -44,7 +44,7 @@ export function TicketPanel(props: Props) {
   return <TicketPanelContent key={props.ticket.id} {...props} />;
 }
 
-function TicketPanelContent({ ticket, columns, people, categories, onClose, onUpdate, onMove, onDelete }: Props) {
+function TicketPanelContent({ ticket, columns, people, categories, onClose, onUpdate, onMove, onRecycle }: Props) {
   const supabase = useMemo(() => createClient(), []);
   const user = useCurrentUser();
   const toast = useToast();
@@ -356,9 +356,9 @@ function TicketPanelContent({ ticket, columns, people, categories, onClose, onUp
           <HistorySection moves={detail.moves} columns={columns} loading={loading} />
 
           <div className="mt-2 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4 text-[12px] text-label">
-            <span>Deleting removes the ticket with its notes, attachments and history.</span>
+            <span>Removed tickets wait in the recycle bin on the Archive page and can be restored.</span>
             <button type="button" onClick={() => setConfirmDelete(true)} className="btn btn-danger btn-sm">
-              Delete ticket
+              Move to recycle bin
             </button>
           </div>
         </div>
@@ -366,19 +366,19 @@ function TicketPanelContent({ ticket, columns, people, categories, onClose, onUp
 
       <ConfirmDialog
         open={confirmDelete}
-        title={`Delete ${ticket.code}?`}
-        confirmLabel="Delete ticket"
-        busyLabel="Deleting…"
+        title={`Move ${ticket.code} to the recycle bin?`}
+        confirmLabel="Move to bin"
+        busyLabel="Moving…"
         onCancel={() => setConfirmDelete(false)}
         onConfirm={async () => {
-          const gone = await onDelete();
+          const gone = await onRecycle();
           if (!gone) setConfirmDelete(false);
         }}
         message={
           <>
-            <span className="font-semibold text-ink-value">{ticket.title}</span> for {ticket.client} will be removed for good, with{" "}
+            <span className="font-semibold text-ink-value">{ticket.title}</span> for {ticket.client} leaves the board but keeps its{" "}
             {detail.notes.length} note{detail.notes.length === 1 ? "" : "s"}, {detail.attachments.length} attachment
-            {detail.attachments.length === 1 ? "" : "s"} and its history. The ticket number will not be reused.
+            {detail.attachments.length === 1 ? "" : "s"} and its history. Restore it any time from the bottom of the Archive page.
           </>
         }
       />

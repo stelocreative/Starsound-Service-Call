@@ -33,7 +33,7 @@ export async function fetchReference(db: Db): Promise<ReferenceData> {
 
 /** Active board: everything except Paid cards older than the archive cutoff. Newest arrivals first. */
 export async function fetchBoardTickets(db: Db, paidColumnId: string | undefined): Promise<Ticket[]> {
-  let query = db.from("tickets").select("*").order("column_entered_at", { ascending: false });
+  let query = db.from("tickets").select("*").is("deleted_at", null).order("column_entered_at", { ascending: false });
   if (paidColumnId) {
     query = query.or(`column_id.neq.${paidColumnId},column_entered_at.gte.${archiveCutoffIso()}`);
   }
@@ -54,13 +54,22 @@ export async function fetchArchiveTickets(db: Db, paidColumnId: string): Promise
       .from("tickets")
       .select("*")
       .eq("column_id", paidColumnId)
+      .is("deleted_at", null)
       .order("column_entered_at", { ascending: false }),
     "Load archive",
   );
 }
 
+/** Tickets in the recycle bin, newest first. */
+export async function fetchDeletedTickets(db: Db): Promise<Ticket[]> {
+  return unwrap(
+    await db.from("tickets").select("*").not("deleted_at", "is", null).order("deleted_at", { ascending: false }),
+    "Load recycle bin",
+  );
+}
+
 export async function fetchTicketById(db: Db, ticketId: string): Promise<Ticket | null> {
-  const { data, error } = await db.from("tickets").select("*").eq("id", ticketId).maybeSingle();
+  const { data, error } = await db.from("tickets").select("*").eq("id", ticketId).is("deleted_at", null).maybeSingle();
   if (error) throw new Error(`Load ticket: ${error.message}`);
   return data;
 }
