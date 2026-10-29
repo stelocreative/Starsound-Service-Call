@@ -30,7 +30,7 @@ const LANES_TOP = PAD + HEADER_H + GAP;
 const LANES_H = STAGE_H - LANES_TOP - GAP - FOOTER_H - PAD;
 /* Card sizes, largest first; the biggest one where every lane still fits without paging wins. */
 const CARD = {
-  large: { h: 164, gap: 12, pad: "10px 14px", code: 17, badge: 16, client: 26, title: 20, twoLines: true },
+  large: { h: 172, gap: 12, pad: "10px 14px", code: 17, badge: 16, client: 26, title: 20, twoLines: true },
   roomy: { h: 100, gap: 10, pad: "10px 14px", code: 16, badge: 15, client: 23, title: 18, twoLines: false },
   compact: { h: 84, gap: 8, pad: "7px 12px", code: 15, badge: 14, client: 21, title: 17, twoLines: false },
 } as const;
