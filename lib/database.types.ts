@@ -130,6 +130,27 @@ export type Database = {
         }
         Relationships: []
       }
+      display_settings: {
+        Row: {
+          id: number
+          key: string
+          rotated_at: string
+          rotated_by_name: string
+        }
+        Insert: {
+          id?: number
+          key?: string
+          rotated_at?: string
+          rotated_by_name?: string
+        }
+        Update: {
+          id?: number
+          key?: string
+          rotated_at?: string
+          rotated_by_name?: string
+        }
+        Relationships: []
+      }
       people: {
         Row: {
           active: boolean
@@ -512,11 +533,13 @@ export type Database = {
       }
       current_display_name: { Args: never; Returns: string }
       default_column_id: { Args: never; Returns: string }
+      display_snapshot: { Args: { p_key: string }; Returns: Json }
       is_allowed: { Args: never; Returns: boolean }
       is_email_allowed: { Args: { p_email: string }; Returns: boolean }
       recycle_ticket: { Args: { p_ticket_id: string }; Returns: undefined }
       reorder_columns: { Args: { p_ids: string[] }; Returns: undefined }
       restore_ticket: { Args: { p_ticket_id: string }; Returns: undefined }
+      rotate_display_key: { Args: never; Returns: string }
       move_ticket: {
         Args: { p_column_id: string; p_ticket_id: string }
         Returns: {

@@ -13,6 +13,7 @@ export type TicketNote = Tables["ticket_notes"]["Row"];
 export type TicketAttachment = Tables["ticket_attachments"]["Row"];
 export type AllowedUser = Tables["allowed_users"]["Row"];
 export type Profile = Tables["profiles"]["Row"];
+export type DisplaySettings = Tables["display_settings"]["Row"];
 
 export type AttachmentKind = "quote" | "invoice" | "other";
 export const ATTACHMENT_KINDS: { value: AttachmentKind; label: string }[] = [

@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { supabaseEnv } from "@/lib/supabase/env";
 
-const PUBLIC_PREFIXES = ["/login", "/auth/"];
+const PUBLIC_PREFIXES = ["/login", "/auth/", "/display"];
 
 /**
  * Refreshes the Supabase session cookie on every request and gates the app:

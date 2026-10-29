@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { TopBar } from "@/components/TopBar";
 import { clsx } from "@/lib/clsx";
-import type { AllowedUser, ReferenceData } from "@/lib/types";
+import type { AllowedUser, DisplaySettings as DisplaySettingsRow, ReferenceData } from "@/lib/types";
 import { CategoriesSettings } from "./CategoriesSettings";
 import { ColumnsSettings } from "./ColumnsSettings";
+import { DisplaySettings } from "./DisplaySettings";
 import { PeopleSettings } from "./PeopleSettings";
 import { UsersSettings } from "./UsersSettings";
 
@@ -14,10 +15,19 @@ const TABS = [
   { key: "columns", label: "Columns" },
   { key: "categories", label: "Categories" },
   { key: "users", label: "Users" },
+  { key: "display", label: "Lobby display" },
 ] as const;
 type TabKey = (typeof TABS)[number]["key"];
 
-export function SettingsView({ reference, allowedUsers }: { reference: ReferenceData; allowedUsers: AllowedUser[] }) {
+export function SettingsView({
+  reference,
+  allowedUsers,
+  display,
+}: {
+  reference: ReferenceData;
+  allowedUsers: AllowedUser[];
+  display: DisplaySettingsRow;
+}) {
   const [tab, setTab] = useState<TabKey>("people");
   const [people, setPeople] = useState(reference.people);
 
@@ -46,6 +56,7 @@ export function SettingsView({ reference, allowedUsers }: { reference: Reference
           {tab === "columns" ? <ColumnsSettings columns={reference.columns} people={people} /> : null}
           {tab === "categories" ? <CategoriesSettings categories={reference.categories} /> : null}
           {tab === "users" ? <UsersSettings users={allowedUsers} people={people} /> : null}
+          {tab === "display" ? <DisplaySettings settings={display} /> : null}
         </section>
       </main>
     </div>
