@@ -30,9 +30,9 @@ const LANES_TOP = PAD + HEADER_H + GAP;
 const LANES_H = STAGE_H - LANES_TOP - GAP - FOOTER_H - PAD;
 /* Card sizes, largest first; the biggest one where every lane still fits without paging wins. */
 const CARD = {
-  large: { h: 144, gap: 12, pad: "10px 14px", code: 17, badge: 16, client: 26, title: 20, titleLines: 2 },
-  roomy: { h: 100, gap: 10, pad: "10px 14px", code: 16, badge: 15, client: 23, title: 18, titleLines: 1 },
-  compact: { h: 84, gap: 8, pad: "7px 12px", code: 15, badge: 14, client: 21, title: 17, titleLines: 1 },
+  large: { h: 164, gap: 12, pad: "10px 14px", code: 17, badge: 16, client: 26, title: 20, twoLines: true },
+  roomy: { h: 100, gap: 10, pad: "10px 14px", code: 16, badge: 15, client: 23, title: 18, twoLines: false },
+  compact: { h: 84, gap: 8, pad: "7px 12px", code: 15, badge: 14, client: 21, title: 17, twoLines: false },
 } as const;
 type CardSize = keyof typeof CARD;
 const CARD_SIZES: CardSize[] = ["large", "roomy", "compact"];
@@ -332,7 +332,11 @@ function LaneView({ lane, model, tick }: { lane: Lane; model: Model; tick: numbe
       aria-label={`${lane.name}: ${lane.tickets.length} tickets`}
     >
       <div className="flex items-center px-1" style={{ height: LANE_HEADER_H, gap: 12 }}>
-        <h2 className="truncate font-heading text-[21px] font-bold uppercase tracking-[0.08em] text-ink-value" title={lane.name}>
+        <h2
+          className="truncate font-heading font-bold uppercase tracking-[0.08em] text-ink-value"
+          style={{ fontSize: lane.name.length > 22 ? 16 : lane.name.length > 16 ? 18 : 21 }}
+          title={lane.name}
+        >
           {lane.name}
         </h2>
         <span className="mono-badge shrink-0 bg-chip text-badge-fg" style={{ fontSize: 15, padding: "2px 10px" }}>
@@ -404,8 +408,11 @@ function CardView({ ticket, model }: { ticket: DisplayTicket; model: Model }) {
           {badge.text}
         </span>
       </div>
-      <div className="flex items-center" style={{ gap: 10 }}>
-        <span className="min-w-0 flex-1 truncate font-semibold leading-tight text-ink-bright" style={{ fontSize: card.client }}>
+      <div className="flex items-start" style={{ gap: 10 }}>
+        <span
+          className={clsx("min-w-0 flex-1 font-semibold leading-tight text-ink-bright", card.twoLines ? "line-clamp-2" : "truncate")}
+          style={{ fontSize: card.client }}
+        >
           {ticket.client}
         </span>
         {isToday ? (
@@ -419,7 +426,7 @@ function CardView({ ticket, model }: { ticket: DisplayTicket; model: Model }) {
         ) : null}
       </div>
       <div
-        className={clsx("leading-tight text-ink-2", card.titleLines === 2 ? "line-clamp-2" : "truncate")}
+        className={clsx("leading-tight text-ink-2", card.twoLines ? "line-clamp-2" : "truncate")}
         style={{ fontSize: card.title }}
       >
         {ticket.title}
