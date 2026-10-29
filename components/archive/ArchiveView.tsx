@@ -91,6 +91,32 @@ export function ArchiveView({ reference, initialTickets }: { reference: Referenc
     }
   };
 
+  const deleteTicket = async (id: string) => {
+    const ticket = tickets.find((t) => t.id === id);
+    if (!ticket) return false;
+    const { data: files, error: listError } = await supabase.from("ticket_attachments").select("storage_path").eq("ticket_id", id);
+    if (listError) {
+      toast.error(`Couldn't delete ${ticket.code}: ${listError.message}`);
+      return false;
+    }
+    if (files && files.length > 0) {
+      const { error: storageError } = await supabase.storage.from("attachments").remove(files.map((f) => f.storage_path));
+      if (storageError) {
+        toast.error(`Couldn't delete ${ticket.code}'s files: ${storageError.message}`);
+        return false;
+      }
+    }
+    const { error } = await supabase.from("tickets").delete().eq("id", id);
+    if (error) {
+      toast.error(`Couldn't delete ${ticket.code}: ${error.message}`);
+      return false;
+    }
+    setOpenId(null);
+    setTickets((list) => list.filter((t) => t.id !== id));
+    toast.success(`${ticket.code} deleted`);
+    return true;
+  };
+
   return (
     <div className="flex min-h-dvh flex-col">
       <TopBar>
@@ -173,6 +199,7 @@ export function ArchiveView({ reference, initialTickets }: { reference: Referenc
           }}
           onUpdate={(patch) => updateTicket(openTicket.id, patch)}
           onMove={(columnId) => moveTicket(openTicket.id, columnId)}
+          onDelete={() => deleteTicket(openTicket.id)}
         />
       ) : null}
     </div>

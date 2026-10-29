@@ -192,6 +192,37 @@ export function Board({ initial }: { initial: BoardData }) {
     [findTicket, patchLocal, supabase, toast],
   );
 
+  const deleteTicket = useCallback(
+    async (ticketId: string) => {
+      const ticket = findTicket(ticketId);
+      if (!ticket) return false;
+      // Storage objects do not cascade with the row, so remove them first.
+      const { data: files, error: listError } = await supabase.from("ticket_attachments").select("storage_path").eq("ticket_id", ticketId);
+      if (listError) {
+        toast.error(`Couldn't delete ${ticket.code}: ${listError.message}`);
+        return false;
+      }
+      if (files && files.length > 0) {
+        const { error: storageError } = await supabase.storage.from("attachments").remove(files.map((f) => f.storage_path));
+        if (storageError) {
+          toast.error(`Couldn't delete ${ticket.code}'s files: ${storageError.message}`);
+          return false;
+        }
+      }
+      const { error } = await supabase.from("tickets").delete().eq("id", ticketId);
+      if (error) {
+        toast.error(`Couldn't delete ${ticket.code}: ${error.message}`);
+        return false;
+      }
+      setData((d) => ({ ...d, tickets: d.tickets.filter((t) => t.id !== ticketId) }));
+      setExtraTicket((t) => (t && t.id === ticketId ? null : t));
+      setOpenId(null);
+      toast.success(`${ticket.code} deleted`);
+      return true;
+    },
+    [findTicket, supabase, toast],
+  );
+
   const createTicket = useCallback(
     async (input: TicketInsert) => {
       const { data: created, error } = await supabase.from("tickets").insert(input).select("*").single();
@@ -402,6 +433,7 @@ export function Board({ initial }: { initial: BoardData }) {
           onClose={closePanel}
           onUpdate={(patch) => updateTicket(openTicket.id, patch)}
           onMove={(columnId) => moveTicket(openTicket.id, columnId)}
+          onDelete={() => deleteTicket(openTicket.id)}
         />
       ) : null}
 

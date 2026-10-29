@@ -239,6 +239,48 @@ export type Database = {
           },
         ]
       }
+      ticket_deletions: {
+        Row: {
+          attachment_paths: string[]
+          client: string
+          code: string
+          column_name: string | null
+          deleted_at: string
+          deleted_by: string | null
+          deleted_by_name: string
+          id: string
+          snapshot: Json
+          ticket_id: string
+          title: string
+        }
+        Insert: {
+          attachment_paths?: string[]
+          client: string
+          code: string
+          column_name?: string | null
+          deleted_at?: string
+          deleted_by?: string | null
+          deleted_by_name?: string
+          id?: string
+          snapshot: Json
+          ticket_id: string
+          title: string
+        }
+        Update: {
+          attachment_paths?: string[]
+          client?: string
+          code?: string
+          column_name?: string | null
+          deleted_at?: string
+          deleted_by?: string | null
+          deleted_by_name?: string
+          id?: string
+          snapshot?: Json
+          ticket_id?: string
+          title?: string
+        }
+        Relationships: []
+      }
       ticket_moves: {
         Row: {
           from_column_id: string | null

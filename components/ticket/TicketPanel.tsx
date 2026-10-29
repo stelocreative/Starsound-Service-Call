@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useCurrentUser } from "@/components/CurrentUserProvider";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useToast } from "@/components/ui/Toaster";
 import { categoryStyle } from "@/lib/categories";
 import { clsx } from "@/lib/clsx";
@@ -31,6 +32,8 @@ type Props = {
   onClose: () => void;
   onUpdate: (patch: TicketUpdate) => Promise<boolean>;
   onMove: (columnId: string) => Promise<void>;
+  /** Deletes the ticket for good; resolves true when it is gone (the parent closes the panel). */
+  onDelete: () => Promise<boolean>;
 };
 
 const EMPTY_DETAIL: TicketDetail = { notes: [], attachments: [], moves: [] };
@@ -41,13 +44,14 @@ export function TicketPanel(props: Props) {
   return <TicketPanelContent key={props.ticket.id} {...props} />;
 }
 
-function TicketPanelContent({ ticket, columns, people, categories, onClose, onUpdate, onMove }: Props) {
+function TicketPanelContent({ ticket, columns, people, categories, onClose, onUpdate, onMove, onDelete }: Props) {
   const supabase = useMemo(() => createClient(), []);
   const user = useCurrentUser();
   const toast = useToast();
   const [detail, setDetail] = useState<TicketDetail>(EMPTY_DETAIL);
   const [urls, setUrls] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const column = columns.find((c) => c.id === ticket.column_id);
   const isPaid = column?.key === PAID_KEY;
@@ -101,7 +105,8 @@ function TicketPanelContent({ ticket, columns, people, categories, onClose, onUp
   // Escape closes (unless typing in a field); lock body scroll while open.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
+      // While the delete confirmation is open, Escape belongs to it.
+      if (e.key !== "Escape" || confirmDelete) return;
       const tag = (document.activeElement?.tagName ?? "").toLowerCase();
       if (tag === "input" || tag === "textarea" || tag === "select") return;
       onClose();
@@ -113,7 +118,7 @@ function TicketPanelContent({ ticket, columns, people, categories, onClose, onUp
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = previous;
     };
-  }, [onClose]);
+  }, [onClose, confirmDelete]);
 
   const postNote = async (body: string) => {
     const optimistic = {
@@ -349,8 +354,34 @@ function TicketPanelContent({ ticket, columns, people, categories, onClose, onUp
           <NotesSection notes={detail.notes} people={people} loading={loading} onPost={postNote} />
           <AttachmentsSection attachments={detail.attachments} urls={urls} loading={loading} onUpload={upload} onDelete={deleteAttachment} />
           <HistorySection moves={detail.moves} columns={columns} loading={loading} />
+
+          <div className="mt-2 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-4 text-[12px] text-label">
+            <span>Deleting removes the ticket with its notes, attachments and history.</span>
+            <button type="button" onClick={() => setConfirmDelete(true)} className="btn btn-danger btn-sm">
+              Delete ticket
+            </button>
+          </div>
         </div>
       </aside>
+
+      <ConfirmDialog
+        open={confirmDelete}
+        title={`Delete ${ticket.code}?`}
+        confirmLabel="Delete ticket"
+        busyLabel="Deleting…"
+        onCancel={() => setConfirmDelete(false)}
+        onConfirm={async () => {
+          const gone = await onDelete();
+          if (!gone) setConfirmDelete(false);
+        }}
+        message={
+          <>
+            <span className="font-semibold text-ink-value">{ticket.title}</span> for {ticket.client} will be removed for good, with{" "}
+            {detail.notes.length} note{detail.notes.length === 1 ? "" : "s"}, {detail.attachments.length} attachment
+            {detail.attachments.length === 1 ? "" : "s"} and its history. The ticket number will not be reused.
+          </>
+        }
+      />
     </div>
   );
 }
