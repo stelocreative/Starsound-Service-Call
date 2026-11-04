@@ -20,11 +20,18 @@ type Props = {
  */
 export function Modal({ open, onClose, title, children, width = 430, labelledBy }: Props) {
   const panelRef = useRef<HTMLDivElement>(null);
+  // Callers often pass a fresh inline onClose on every render. Keep the latest one in a ref so
+  // the open effect below runs only when the dialog opens, not on every parent re-render
+  // (re-running it moved the cursor back to the first field mid-typing whenever the board refreshed).
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  });
 
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") onCloseRef.current();
     };
     document.addEventListener("keydown", onKey);
     const previous = document.activeElement as HTMLElement | null;
@@ -34,7 +41,7 @@ export function Modal({ open, onClose, title, children, width = 430, labelledBy 
       document.removeEventListener("keydown", onKey);
       previous?.focus?.();
     };
-  }, [open, onClose]);
+  }, [open]);
 
   if (!open || typeof document === "undefined") return null;
 
